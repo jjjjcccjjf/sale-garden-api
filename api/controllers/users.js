@@ -15,14 +15,26 @@ exports.add = function(req, res) {
 
   _new.save(function(err, users) {
     if (err) res.send(err);
+
+    // ADD EMAIL CONFIRMATION BLOCK HERE
+
     res.json(users);
   });
 };
 
 exports.single = function(req, res) {
-  Users.findById(req.params.userId, function(err, users) {
+  Users.findById(req.params.id, function(err, users) {
     if (err) res.send(err);
     res.json(users);
+  });
+};
+
+exports.delete = function(req, res) {
+  Users.remove({
+    _id: req.params.id
+  }, function(err, users) {
+    if (err) res.send(err);
+    res.json({ message: 'Users successfully deleted' }); //Todo make 201
   });
 };
 
@@ -33,17 +45,13 @@ exports.update = function(req, res) {
   });
 };
 
-exports.delete = function(req, res) {
-  Users.remove({
-    _id: req.params.userId
-  }, function(err, users) {
-    if (err) res.send(err);
-    res.json({ message: 'Users successfully deleted' }); //Todo make 201
-  });
-};
 
+/**
+ * format the request body to appropriate format
+ * @param  {obj} unformatted raw req.body
+ * @return {obj}             [description]
+ */
 var formatFields = function(unformatted){
-
   var formatted = {}
   formatted.name = {
     "first" : unformatted.fname,

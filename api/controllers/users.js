@@ -11,7 +11,7 @@ exports.all = function(req, res) {
   });
 };
 
-exports.add = function(req, res) {
+exports.register = function(req, res) {
   var _new = new Users(formatFields(req.body))
 
   _new.save(function(err, doc) {
@@ -37,15 +37,16 @@ exports.add = function(req, res) {
       // setup email data with unicode symbols
       let mailOptions = {
         from: 'lorenzosalamante@gmail.com', // sender address
-        to: 'lorenzosalamante@gmail.com', // list of receivers
+        to: doc.email, // list of receivers
         subject: 'Activate your account ENV', // Subject line
-        html: '<a href="http://localhost:3000/api/users/activate/?code=' + users.activationCode + '">Activate your account</a>' // html body
+        html: '<a href="http://localhost:3000/api/users/activate/?code=' + doc.activationCode + '">Activate your account</a>' // html body
       };
 
       // send mail with defined transport object
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.log(error);
+          // REVIEW: Delete if fail???
         }
       });
     });

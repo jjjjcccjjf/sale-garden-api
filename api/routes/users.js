@@ -6,7 +6,7 @@ module.exports = function(app){
   .get(users.all);
 
   app.route('/api/users/register')
-  .post(users.add);
+  .post(users.register);
 
   app.route('/api/users/activate')
   .get(users.activate);

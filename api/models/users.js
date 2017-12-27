@@ -15,12 +15,16 @@ var schema = new Schema(
     avatar: String,
     accountStatus: {
       type: String,
-      enum: ['active', 'deactivated', 'awaiting confirmation'],
-      default: 'awaiting confirmation'
+      enum: [
+        'active', // OK
+        'inactive', // Banned or smthng
+        'pending' // Needs to activate via email A.K.A. Newly registered
+      ],
+      default: 'pending'
     },
     activationCode: {
       type: String,
-      default: 
+      default:
       /**
       * Returns a random string
       * @url: https://stackoverflow.com/a/1349426/7800523

@@ -1,4 +1,5 @@
 module.exports = function(app){
+  
   var users = require('../controllers/users');
 
   app.route('/api/users')
@@ -11,4 +12,5 @@ module.exports = function(app){
   .get(users.single)
   .post(users.update)
   .delete(users.delete);
+
 }

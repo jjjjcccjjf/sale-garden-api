@@ -18,6 +18,24 @@ var schema = new Schema(
       enum: ['active', 'deactivated', 'awaiting confirmation'],
       default: 'awaiting confirmation'
     },
+    activationCode: {
+      type: String,
+      default: 
+      /**
+      * Returns a random string
+      * @url: https://stackoverflow.com/a/1349426/7800523
+      * @return {string} random string
+      */
+      function(){
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 75; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+      }
+    },
   },
   {
     timestamps: true

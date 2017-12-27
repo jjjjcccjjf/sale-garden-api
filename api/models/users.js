@@ -1,18 +1,32 @@
 'use strict';
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var uniqueValidator = require('mongoose-unique-validator');
 
-var schema = new Schema(
+var schema = mongoose.Schema(
   {
-    name:{
-      first: String,
-      last: String
+    name:  {
+      type: String,
+      trim: true,
+      required: true
     },
-    email: String,
-    username: String,
-    password: String,
+    email: {
+      type: String,
+      trim: true,
+      required: true,
+      unique: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
+    username: {
+      type: String,
+      trim: true,
+      unique: true,
+      sparse: true, // @link: https://stackoverflow.com/questions/24430220/e11000-duplicate-key-error-index-in-mongodb-mongoose
+    },
     addresses: [{ label: String, coord: String }],
-    avatar: String,
+    avatar: String, // TODO: Gravatar
     accountStatus: {
       type: String,
       enum: [
@@ -24,21 +38,6 @@ var schema = new Schema(
     },
     activationCode: {
       type: String,
-      default:
-      /**
-      * Returns a random string
-      * @url: https://stackoverflow.com/a/1349426/7800523
-      * @return {string} random string
-      */
-      function(){
-        var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (var i = 0; i < 75; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-        return text;
-      }
     },
   },
   {
@@ -46,4 +45,5 @@ var schema = new Schema(
   }
 );
 
+schema.plugin(uniqueValidator);
 module.exports = mongoose.model('Users', schema);

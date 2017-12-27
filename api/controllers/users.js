@@ -1,59 +1,59 @@
 'use strict';
 
+var crypto = require('crypto');
 var mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 var Users = mongoose.model('Users');
 
 exports.all = function(req, res) {
   Users.find({}, function(err, doc) {
-    if (err) res.send(err);
+    if (err) { res.send(err); }
     res.json(doc);
   });
 };
 
 exports.register = function(req, res) {
-  var _new = new Users(formatFields(req.body))
+  var _new = new Users(req.body)
+
+  _new.activationCode = crypto.randomBytes(30).toString('hex'); // Generate activation code here, not on the schema!!
 
   _new.save(function(err, doc) {
-    if (err) res.send(err);
+    if (err){
+      res.send(err);
+    }
+    else {
+      /** email block goes here */
+      nodemailer.createTestAccount((err, account) => {
 
-    /**
-    * email block goes here
-    */
+        // create reusable transporter object using the default SMTP transport
+        const transporter = nodemailer.createTransport({
+          host: 'mail.smtp2go.com',
+          port: 587,
+          secure: false,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+          }
+        });
 
-    nodemailer.createTestAccount((err, account) => {
+        // setup email data with unicode symbols
+        let mailOptions = {
+          from: 'lorenzosalamante@gmail.com', // sender address
+          to: doc.email, // list of receivers
+          subject: 'Activate your account ENV', // Subject line
+          html: '<a href="http://localhost:3000/api/users/activate/?code=' + doc.activationCode + '">Activate your account</a>' // html body
+        };
 
-      // create reusable transporter object using the default SMTP transport
-      const transporter = nodemailer.createTransport({
-        host: 'mail.smtp2go.com',
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        }
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.log(error);
+            // REVIEW: Delete if fail???
+          }
+        });
       });
-
-      // setup email data with unicode symbols
-      let mailOptions = {
-        from: 'lorenzosalamante@gmail.com', // sender address
-        to: doc.email, // list of receivers
-        subject: 'Activate your account ENV', // Subject line
-        html: '<a href="http://localhost:3000/api/users/activate/?code=' + doc.activationCode + '">Activate your account</a>' // html body
-      };
-
-      // send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-          // REVIEW: Delete if fail???
-        }
-      });
-    });
-
-    /**
-    * email block goes here
-    */
+      /** email block goes here */
+    }
 
     res.json(doc);
   });
@@ -61,7 +61,7 @@ exports.register = function(req, res) {
 
 exports.single = function(req, res) {
   Users.findById(req.params.id, function(err, doc) {
-    if (err) res.send(err);
+    if (err) { res.send(err); }
     res.json(doc);
   });
 };
@@ -70,14 +70,14 @@ exports.delete = function(req, res) {
   Users.remove({
     _id: req.params.id
   }, function(err, doc) {
-    if (err) res.send(err);
-    res.json({ message: 'Users successfully deleted' }); //Todo make 201
+    if (err) { res.send(err); }
+    res.json({ message: 'User successfully deleted' }); //Todo make 201
   });
 };
 
 exports.update = function(req, res) {
-  Users.findOneAndUpdate({_id: req.params.id}, formatFields(req.body), {new: true}, function(err, doc) {
-    if (err) res.send(err);
+  Users.findOneAndUpdate({ _id: req.params.id }, { $set: req.body }, { new: true, runValidators: true, context: 'query' }, function(err, doc) {
+    if (err) { res.send(err); }
     res.json(doc);
   });
 };
@@ -85,7 +85,7 @@ exports.update = function(req, res) {
 exports.activate = function(req, res) {
   Users.findOneAndUpdate(
     {
-      activationCode: req.query.code
+      activationCode: req.query.code // get the `code` query string
     },
     {
       $set: { accountStatus: 'active' },
@@ -95,7 +95,7 @@ exports.activate = function(req, res) {
       new: true
     },
     function(err, doc) {
-      if (err) res.send(err);
+      if (err){ res.send(err); }
 
       if(doc === null){ // If there are no documents matching our activation code
         res.send('Not found'); //TODO: Add appropriate response headers
@@ -105,21 +105,3 @@ exports.activate = function(req, res) {
     }
   );
 };
-
-
-/**
-* format the request body to appropriate format
-* @param  {obj} unformatted raw req.body
-* @return {obj}             [description]
-*/
-var formatFields = function(unformatted){
-  var formatted = {}
-  formatted.name = {
-    "first" : unformatted.fname,
-    "last" : unformatted.lname
-  };
-  formatted.email = unformatted.email
-  formatted.password = unformatted.password
-
-  return formatted;
-}

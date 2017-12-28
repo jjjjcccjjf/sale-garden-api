@@ -24,6 +24,12 @@ var schema = mongoose.Schema(
       trim: true,
       unique: true,
       sparse: true, // @link: https://stackoverflow.com/questions/24430220/e11000-duplicate-key-error-index-in-mongodb-mongoose
+      validate: {
+        validator: function(v) {
+          return /^[a-zA-Z0-9_]*$/.test(v);
+        },
+        message: 'The username field only allows alphanumeric characters and undescores'
+      },
     },
     addresses: [{ label: String, coord: String }],
     avatar: String, // TODO: Gravatar

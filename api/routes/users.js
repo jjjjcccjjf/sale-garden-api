@@ -11,6 +11,9 @@ module.exports = function(app){
   app.route('/api/users/activate')
   .get(users.activate);
 
+  app.route('/api/users/resend/code')
+  .post(users.resendCode);
+
   app.route('/api/users/:id')
   .get(users.single)
   .post(users.update)

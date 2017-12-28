@@ -1,8 +1,22 @@
 'use strict';
-var mongoose = require('mongoose');
-var uniqueValidator = require('mongoose-unique-validator');
+const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt-nodejs');
+const nodemailer = require('nodemailer');
 
-var schema = mongoose.Schema(
+// create reusable transporter object using the default SMTP transport
+const transporter = nodemailer.createTransport({
+  host: 'mail.smtp2go.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+});
+
+const schema = mongoose.Schema(
   {
     name:  {
       type: String,
@@ -13,6 +27,7 @@ var schema = mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+      lowercase: true,
       unique: true
     },
     password: {
@@ -26,7 +41,7 @@ var schema = mongoose.Schema(
       sparse: true, // @link: https://stackoverflow.com/questions/24430220/e11000-duplicate-key-error-index-in-mongodb-mongoose
       validate: {
         validator: function(v) {
-          return /^[a-zA-Z0-9_]*$/.test(v);
+          return /^[a-zA-Z0-9_]*$/.test(v); // @link: https://stackoverflow.com/a/336220/7800523
         },
         message: 'The username field only allows alphanumeric characters and undescores'
       },
@@ -50,6 +65,28 @@ var schema = mongoose.Schema(
     timestamps: true
   }
 );
+
+schema.methods.hashPassword = function(password) {
+  this.password =  bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+};
+
+schema.methods.validatePassword = function(password) {
+  return bcrypt.compareSync(password, this.password);
+};
+
+schema.methods.generateActivationCode = function(code) {
+  this.activationCode = crypto.randomBytes(30).toString('hex');
+};
+
+schema.methods.sendActivationCode = function() {
+  let mailOptions = { // setup email data with unicode symbols
+    from: 'lorenzosalamante@gmail.com', // sender address FIXME
+    to: this.email, // list of receivers
+    subject: 'Activate your account', // Subject line
+    html: '<a href="http://localhost:3000/api/users/activate/?code=' + this.activationCode + '">Activate your account</a>' // html body FIXME
+  };
+  transporter.sendMail(mailOptions, (error, info) => { if (error) { console.log(error); } }); // send mail with defined transport object
+};
 
 schema.plugin(uniqueValidator);
 module.exports = mongoose.model('Users', schema);

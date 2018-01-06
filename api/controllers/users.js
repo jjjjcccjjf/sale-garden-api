@@ -89,7 +89,7 @@ exports.login = function(req, res) {
     if (err) { res.send(err); }
 
     if(!doc){
-      res.status(401).json({message:"User doesn't exist"});
+      return res.status(401).json({message:"User doesn't exist"});
     }
 
     if(doc.validatePassword(req.body.password)) {

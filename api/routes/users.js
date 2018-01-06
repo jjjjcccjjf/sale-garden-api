@@ -1,6 +1,7 @@
 module.exports = function(app, passport){
 
   var users = require('../controllers/users');
+  var profile = require('../controllers/profile');
 
   app.route('/api/users')
   .get(users.all);
@@ -28,5 +29,8 @@ module.exports = function(app, passport){
   .post(users.update)
   .delete(users.delete);
 
+  app.route('/api/profile')
+  .get(passport.authenticate('jwt', { session: false }), profile.get)
+  .post(passport.authenticate('jwt', { session: false }), profile.update);
 
 }

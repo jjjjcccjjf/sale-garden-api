@@ -5,6 +5,10 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt-nodejs');
 const nodemailer = require('nodemailer');
 
+const config = require('../config');
+const jwt = config.jwt;
+const jwtOptions = config.jwtOptions;
+
 // create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
   host: 'mail.smtp2go.com',
@@ -66,8 +70,8 @@ const schema = mongoose.Schema(
   }
 );
 
-schema.methods.hashPassword = function(password) {
-  this.password =  bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+schema.statics.hashPassword = function(password) { // @link: https://stackoverflow.com/questions/29664499/mongoose-static-methods-vs-instance-methods
+  return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
 };
 
 schema.methods.validatePassword = function(password) {
@@ -75,7 +79,11 @@ schema.methods.validatePassword = function(password) {
 };
 
 schema.methods.generateActivationCode = function(code) {
-  this.activationCode = crypto.randomBytes(30).toString('hex');
+  return crypto.randomBytes(30).toString('hex');
+};
+
+schema.methods.generateJWT = function() {
+  return jwt.sign({id: this._id}, jwtOptions.secretOrKey); //REVIEW: JWT Standards
 };
 
 schema.methods.sendActivationCode = function() {

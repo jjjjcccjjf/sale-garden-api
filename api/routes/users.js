@@ -1,4 +1,4 @@
-module.exports = function(app){
+module.exports = function(app, passport){
 
   var users = require('../controllers/users');
 
@@ -14,9 +14,19 @@ module.exports = function(app){
   app.route('/api/users/resend/code')
   .post(users.resendCode);
 
+  // This route has to go first
+  app.route('/api/users/login')
+  .post(users.login);
+
+  app.route('/secret')
+  .get(passport.authenticate('jwt', { session: false }), function(req, res){
+    res.json("Success you can see me");
+  });
+
   app.route('/api/users/:id')
   .get(users.single)
   .post(users.update)
   .delete(users.delete);
+
 
 }

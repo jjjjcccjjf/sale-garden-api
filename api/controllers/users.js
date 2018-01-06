@@ -13,8 +13,8 @@ exports.all = function(req, res) {
 exports.register = function(req, res) {
   var user = new Users(req.body)
 
-  user.hashPassword();
-  user.generateActivationCode();
+  user.password = Users.hashPassword(user.password);
+  user.activationCode = user.generateActivationCode(); // REVIEW: Refactor?? hmmm
 
   user.save(function(err, doc) {
     if (err){
@@ -44,7 +44,11 @@ exports.delete = function(req, res) {
 };
 
 exports.update = function(req, res) {
-  Users.findOneAndUpdate({ _id: req.params.id }, { $set: req.body }, { new: true, runValidators: true, context: 'query' }, function(err, doc) {
+
+  var params = req.body;
+  params.password = Users.hashPassword(params.password);
+
+  Users.findOneAndUpdate({ _id: req.params.id }, { $set: params }, { new: true, runValidators: true, context: 'query' }, function(err, doc) {
     if (err) { res.send(err); }
     res.json(doc);
   });
@@ -76,4 +80,26 @@ exports.resendCode = function(req, res){ // TODO: Make limit 10 min per email
     }
 
   });
+};
+
+
+exports.login = function(req, res) {
+
+  Users.findOne({email: req.body.email}, function(err, doc) {
+    if (err) { res.send(err); }
+
+    if(!doc){
+      res.status(401).json({message:"User doesn't exist"});
+    }
+
+    if(doc.validatePassword(req.body.password)) {
+      var token = doc.generateJWT();
+
+      res.json({message: "ok", token: token});
+    } else {
+      res.status(401).json({message:"passwords did not match"});
+    }
+
+  });
+
 };

@@ -1,18 +1,22 @@
 require('dotenv').config();
 
-var express = require('express');
-var app = express();
-var port = process.env.PORT || 3000;
-var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
-var Users = require('./api/models/users');
+const config = require('./api/config');
+const passport = config.passport;
 
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/SaleApp');
 
-// Use body parser
+// Passport Strategy
+
+// Inits: Use body parser, Initialize Passport
+app.use(passport.initialize());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
 
@@ -27,7 +31,7 @@ app.use(function (req, res, next) {
   next()
 })
 
-usersRoutes(app);
+usersRoutes(app, passport);
 
 // 404
 app.use(function(req, res) {

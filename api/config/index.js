@@ -13,7 +13,7 @@ exports.JwtStrategy = JwtStrategy;
 
 
 exports.jwtOptions = {
-  jwtFromRequest : ExtractJwt.fromAuthHeaderWithScheme('jwt'),
+  jwtFromRequest : ExtractJwt.fromAuthHeaderWithScheme('bearer'),
   secretOrKey : 'tasmanianDevil'
 };
 

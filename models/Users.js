@@ -80,12 +80,12 @@ schema.methods.generateActivationCode = function(code) {
 };
 
 schema.methods.generateJWT = function() {
-  return jwt.sign({id: this._id}, process.env.SECRETORKEY); //REVIEW: JWT Standards
+  return jwt.sign({id: this._id}, process.env.SECRET_OR_KEY); //REVIEW: JWT Standards
 };
 
 schema.methods.sendActivationCode = function() {
   let mailOptions = { // setup email data with unicode symbols
-    from: 'lorenzosalamante@gmail.com', // sender address FIXME
+    from: process.env.FROM_EMAIL, // sender address FIXME
     to: this.email, // list of receivers
     subject: 'Activate your account', // Subject line
     html: '<a href="http://localhost:3000/v1/users/activate/?code=' + this.activationCode + '">Activate your account</a>' // html body FIXME

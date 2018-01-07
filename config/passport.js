@@ -9,12 +9,12 @@ var JwtStrategy = passportJWT.Strategy;
 
 const jwtOptions = {
   jwtFromRequest : ExtractJwt.fromAuthHeaderWithScheme('bearer'),
-  secretOrKey : process.env.SECRETORKEY
+  secretOrKey : process.env.SECRET_OR_KEY
 };
 
-const strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
-  console.log('payload received', jwt_payload);
-  Users.findById(jwt_payload.id, function(err, doc) {
+const strategy = new JwtStrategy(jwtOptions, function(jwtPayload, next) {
+  console.log('payload received', jwtPayload);
+  Users.findById(jwtPayload.id, function(err, doc) {
     if (err) { res.send(err); }
     if (doc) {
       next(null, doc);
@@ -25,5 +25,3 @@ const strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
 });
 
 passport.use(strategy);
-
-// module.exports = passport;

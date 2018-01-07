@@ -1,7 +1,7 @@
 const passport = require('passport');
 const router = require('express').Router();
-const users = require('../../../controllers/users');
-const profile = require('../../../controllers/profile');
+const users = require('../../controllers/users');
+const profile = require('../../controllers/profile');
 
 router.get('/users', users.all);
 

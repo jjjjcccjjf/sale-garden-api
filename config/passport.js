@@ -1,25 +1,18 @@
 var jwt = require('jsonwebtoken');
-
 var passport = require("passport");
 var passportJWT = require("passport-jwt");
+var mongoose = require('mongoose');
+var Users = mongoose.model('Users');
 
 var ExtractJwt = passportJWT.ExtractJwt;
 var JwtStrategy = passportJWT.Strategy;
 
-exports.jwt = jwt;
-exports.passportJWT = passportJWT;
-exports.ExtractJwt = ExtractJwt;
-exports.JwtStrategy = JwtStrategy;
-
-
-exports.jwtOptions = {
+const jwtOptions = {
   jwtFromRequest : ExtractJwt.fromAuthHeaderWithScheme('bearer'),
-  secretOrKey : 'tasmanianDevil'
+  secretOrKey : process.env.SECRETORKEY
 };
 
-var Users = require('../models/users'); // Only call this after everything else is done so YOU don't overwrite exports!!
-
-exports.strategy = new JwtStrategy(this.jwtOptions, function(jwt_payload, next) {
+const strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
   console.log('payload received', jwt_payload);
   Users.findById(jwt_payload.id, function(err, doc) {
     if (err) { res.send(err); }
@@ -31,6 +24,6 @@ exports.strategy = new JwtStrategy(this.jwtOptions, function(jwt_payload, next) 
   });
 });
 
-passport.use(this.strategy);
+passport.use(strategy);
 
-exports.passport = passport;
+// module.exports = passport;

@@ -4,10 +4,7 @@ const uniqueValidator = require('mongoose-unique-validator');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt-nodejs');
 const nodemailer = require('nodemailer');
-
-const config = require('../config');
-const jwt = config.jwt;
-const jwtOptions = config.jwtOptions;
+const jwt = require('jsonwebtoken');
 
 // create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
@@ -83,7 +80,7 @@ schema.methods.generateActivationCode = function(code) {
 };
 
 schema.methods.generateJWT = function() {
-  return jwt.sign({id: this._id}, jwtOptions.secretOrKey); //REVIEW: JWT Standards
+  return jwt.sign({id: this._id}, process.env.SECRETORKEY); //REVIEW: JWT Standards
 };
 
 schema.methods.sendActivationCode = function() {
@@ -91,10 +88,10 @@ schema.methods.sendActivationCode = function() {
     from: 'lorenzosalamante@gmail.com', // sender address FIXME
     to: this.email, // list of receivers
     subject: 'Activate your account', // Subject line
-    html: '<a href="http://localhost:3000/api/users/activate/?code=' + this.activationCode + '">Activate your account</a>' // html body FIXME
+    html: '<a href="http://localhost:3000/v1/users/activate/?code=' + this.activationCode + '">Activate your account</a>' // html body FIXME
   };
   transporter.sendMail(mailOptions, (error, info) => { if (error) { console.log(error); } }); // send mail with defined transport object
 };
 
 schema.plugin(uniqueValidator);
-module.exports = mongoose.model('Users', schema);
+mongoose.model('Users', schema);

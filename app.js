@@ -18,7 +18,7 @@ mongoose.connect('mongodb://localhost/SaleApp');
 // Inits: Use body parser, Initialize Passport
 app.use(passport.initialize());
 app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(bodyParser.json());
+app.use(bodyParser.json());
 
 /**********
 * routes *

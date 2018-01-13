@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
 const crypto = require('crypto')
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 const jwt = require('jsonwebtoken')
 
@@ -68,11 +68,17 @@ const schema = mongoose.Schema(
 )
 
 schema.statics.hashPassword = function (password) { // @link: https://stackoverflow.com/questions/29664499/mongoose-static-methods-vs-instance-methods
-  return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+  bcrypt.hash(password, 10, function (err, hash) {
+    if (err) { console.log(err) }
+    return hash
+  })
 }
 
 schema.methods.validatePassword = function (password) {
-  return bcrypt.compareSync(password, this.password)
+  bcrypt.compare(password, this.password, function (err, res) {
+    if (err) { console.log(err) }
+    return res
+  })
 }
 
 schema.methods.generateActivationCode = function (code) {
@@ -86,7 +92,7 @@ schema.methods.generateJWT = function () {
       iat: Date.now()
       // exp: Math.floor(Date.now() / 1000) + (60 * 60) // Make expiration 1 hour TODO: Add expiration to tokens
     },
-  process.env.SECRET_OR_KEY) // REVIEW: JWT Standards
+    process.env.SECRET_OR_KEY) // REVIEW: JWT Standards
 }
 
 schema.methods.sendActivationCode = function () {

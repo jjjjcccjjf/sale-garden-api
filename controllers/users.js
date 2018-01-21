@@ -13,17 +13,27 @@ exports.all = function (req, res) {
 exports.register = function (req, res) {
   var user = new Users(req.body)
 
-  user.password = Users.hashPassword(user.password)
-  user.activationCode = user.generateActivationCode() // REVIEW: Refactor?? hmmm
+  const hash = Users.hashPassword(user.password)
+  const activationCode = Users.generateActivationCode() // REVIEW: Refactor?? hmmm
 
-  user.save(function (err, doc) {
-    if (err) {
-      res.send(err)
-    } else {
-      user.sendActivationCode()
-      res.json(doc)
-    }
+  Promise.all([activationCode, hash])
+  .then(function ([activationCode, hash]) {
+    user.activationCode = activationCode
+    user.password = hash
+    save()
   })
+  .catch((err) => console.error(err))
+
+  function save () {
+    user.save(function (err, doc) {
+      if (err) {
+        res.send(err)
+      } else {
+        user.sendActivationCode()
+        res.json(doc)
+      }
+    })
+  }
 }
 
 exports.single = function (req, res) {
@@ -43,12 +53,15 @@ exports.delete = function (req, res) {
 }
 
 exports.update = function (req, res) {
-  var params = req.body
-  params.password = Users.hashPassword(params.password)
+  const params = req.body
+  const hashPromise = Users.hashPassword(params.password)
 
-  Users.findOneAndUpdate({ _id: req.params.id }, { $set: params }, { new: true, runValidators: true, context: 'query' }, function (err, doc) {
-    if (err) { res.send(err) }
-    res.json(doc)
+  hashPromise.then(function (hash) {
+    params.password = hash
+    Users.findOneAndUpdate({ _id: req.params.id }, { $set: params }, { new: true, runValidators: true, context: 'query' }, function (err, doc) {
+      if (err) { res.send(err) }
+      res.json(doc)
+    })
   })
 }
 
@@ -88,12 +101,15 @@ exports.login = function (req, res) {
       return res.status(401).json({message: 'User doesn\'t exist'})
     }
 
-    if (doc.validatePassword(req.body.password)) {
-      var token = doc.generateJWT()
+    const validatePromise = doc.validatePassword(req.body.password)
+    validatePromise.then(function (passwordMatch) {
+      if (passwordMatch) {
+        var token = doc.generateJWT()
 
-      res.json({message: 'ok', token: token})
-    } else {
-      res.status(401).json({message: 'passwords did not match'})
-    }
+        res.json({message: 'ok', token: token})
+      } else {
+        res.status(401).json({message: 'passwords did not match'})
+      }
+    })
   })
 }

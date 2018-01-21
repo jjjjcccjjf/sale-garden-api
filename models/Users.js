@@ -68,21 +68,16 @@ const schema = mongoose.Schema(
 )
 
 schema.statics.hashPassword = function (password) { // @link: https://stackoverflow.com/questions/29664499/mongoose-static-methods-vs-instance-methods
-  bcrypt.hash(password, 10, function (err, hash) {
-    if (err) { console.log(err) }
-    return hash
-  })
+  return bcrypt.hash(password, 10)
 }
 
 schema.methods.validatePassword = function (password) {
-  bcrypt.compare(password, this.password, function (err, res) {
-    if (err) { console.log(err) }
-    return res
-  })
+  return bcrypt.compare(password, this.password)
 }
 
-schema.methods.generateActivationCode = function (code) {
-  return crypto.randomBytes(30).toString('hex')
+schema.statics.generateActivationCode = function () {
+  const code = crypto.randomBytes(30).toString('hex')
+  return Promise.resolve(code)
 }
 
 schema.methods.generateJWT = function () {
@@ -92,7 +87,8 @@ schema.methods.generateJWT = function () {
       iat: Date.now()
       // exp: Math.floor(Date.now() / 1000) + (60 * 60) // Make expiration 1 hour TODO: Add expiration to tokens
     },
-    process.env.SECRET_OR_KEY) // REVIEW: JWT Standards
+    process.env.SECRET_OR_KEY
+  ) // REVIEW: JWT Standards
 }
 
 schema.methods.sendActivationCode = function () {

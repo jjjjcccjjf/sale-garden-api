@@ -98,7 +98,7 @@ schema.methods.sendActivationCode = function () {
     subject: 'Activate your account', // Subject line
     html: '<a href="http://localhost:3000/v1/users/activate/?code=' + this.activationCode + '">Activate your account</a>' // html body FIXME: Base url
   }
-  transporter.sendMail(mailOptions, (error, info) => { if (error) { console.log(error) } }) // send mail with defined transport object
+  transporter.sendMail(mailOptions, (error, info) => { if (error) { console.error(error) } }) // send mail with defined transport object
 }
 
 schema.plugin(uniqueValidator)

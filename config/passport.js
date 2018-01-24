@@ -13,7 +13,7 @@ const jwtOptions = {
 };
 
 const strategy = new JwtStrategy(jwtOptions, function(jwtPayload, next) {
-  console.log('payload received', jwtPayload);
+  // console.log('payload received', jwtPayload);
   Users.findById(jwtPayload.id, function(err, doc) {
     if (err) { res.send(err); }
     if (doc) {

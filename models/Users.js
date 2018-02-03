@@ -68,7 +68,15 @@ const schema = mongoose.Schema(
 )
 
 schema.statics.hashPassword = function (password) { // @link: https://stackoverflow.com/questions/29664499/mongoose-static-methods-vs-instance-methods
-  return bcrypt.hash(password, 10)
+  return new Promise(
+    (resolve, reject) => {
+      if (password !== undefined) {
+        resolve(bcrypt.hash(password, 10))
+      } else {
+        resolve('') // return empty string upon blank password field
+      }
+    }
+  )
 }
 
 schema.methods.validatePassword = function (password) {

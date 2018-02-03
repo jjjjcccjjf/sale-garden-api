@@ -22,15 +22,17 @@ exports.register = function (req, res) {
     user.password = hash
     save()
   })
-  .catch((err) => console.error(err))
+  .catch((err) => {
+    res.status(400).json({message: err})
+  })
 
   function save () {
     user.save(function (err, doc) {
       if (err) {
-        res.send(err)
+        res.status(400).json(err)
       } else {
         user.sendActivationCode()
-        res.json(doc)
+        res.status(201).json(doc)
       }
     })
   }

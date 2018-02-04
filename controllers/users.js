@@ -14,7 +14,7 @@ exports.register = function (req, res) {
   var user = new Users(req.body)
 
   const hash = Users.hashPassword(user.password)
-  const activationCode = Users.generateActivationCode() // REVIEW: Refactor?? hmmm
+  const activationCode = Users.generateActivationCode()
 
   Promise.all([activationCode, hash])
   .then(function ([activationCode, hash]) {
@@ -42,8 +42,11 @@ exports.register = function (req, res) {
 
 exports.single = function (req, res) {
   Users.findById(req.params.id, function (err, doc) {
-    if (err) { res.send(err) }
-    res.json(doc)
+    if (err) {
+      res.status(400).json(err)
+    } else {
+      res.json(doc)
+    }
   })
 }
 
@@ -51,8 +54,11 @@ exports.delete = function (req, res) {
   Users.remove({
     _id: req.params.id
   }, function (err, doc) {
-    if (err) { res.send(err) }
-    res.json({ message: 'User successfully deleted' }) // Todo make 201
+    if (err) {
+      res.status(400).json(err)
+    } else {
+      res.status(204).json()
+    }
   })
 }
 

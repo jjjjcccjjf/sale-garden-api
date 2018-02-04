@@ -16,24 +16,24 @@ describe('/GET users', () => {
   before(function (done) {
     Users.remove({}, (err) => {
       if (err) console.error(err)
+
+      Users.collection.insert(
+        {
+          'addresses': [],
+          'accountStatus': 'pending',
+          '_id': new mongoose.Types.ObjectId(userId),
+          'email': 'tester@gmail.com',
+          'password': '$2a$10$8dfbesTGz6ACWURwUBsy5.1TAsaEyypdCzZCUvSAnUywQYoXZ.556',
+          'name': 'Jason Bourne',
+          'activationCode': 'd2c4b55797b9d86337e201a6bcc06d23c745125039fd4812b7870b23f3ed',
+          'createdAt': '2018-02-04T13:21:25.716Z',
+          'updatedAt': '2018-02-04T13:21:25.716Z',
+          '__v': 0
+        }
+      )
+
+      done()
     })
-
-    Users.collection.insert(
-      {
-        'addresses': [],
-        'accountStatus': 'pending',
-        '_id': new mongoose.Types.ObjectId('5a7708d58a62931ca0a099ea'),
-        'email': 'tester@gmail.com',
-        'password': '$2a$10$8dfbesTGz6ACWURwUBsy5.1TAsaEyypdCzZCUvSAnUywQYoXZ.556',
-        'name': 'Jason Bourne',
-        'activationCode': 'd2c4b55797b9d86337e201a6bcc06d23c745125039fd4812b7870b23f3ed',
-        'createdAt': '2018-02-04T13:21:25.716Z',
-        'updatedAt': '2018-02-04T13:21:25.716Z',
-        '__v': 0
-      }
-    )
-
-    done()
   })
 
   it('it should GET all the users', (done) => {
@@ -61,6 +61,28 @@ describe('/GET users', () => {
 })
 
 describe('/DELETE users', () => {
+  before(function (done) {
+    Users.remove({}, (err) => {
+      if (err) console.error(err)
+
+      Users.collection.insert(
+        {
+          'addresses': [],
+          'accountStatus': 'pending',
+          '_id': new mongoose.Types.ObjectId(userId),
+          'email': 'tester@gmail.com',
+          'password': '$2a$10$8dfbesTGz6ACWURwUBsy5.1TAsaEyypdCzZCUvSAnUywQYoXZ.556',
+          'name': 'Jason Bourne',
+          'activationCode': 'd2c4b55797b9d86337e201a6bcc06d23c745125039fd4812b7870b23f3ed',
+          'createdAt': '2018-02-04T13:21:25.716Z',
+          'updatedAt': '2018-02-04T13:21:25.716Z',
+          '__v': 0
+        }
+      )
+      done()
+    })
+  })
+
   it('it should DELETE test user ' + userId, (done) => {
     chai.request(app)
     .del('/v1/users/' + userId)

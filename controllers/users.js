@@ -23,7 +23,9 @@ exports.register = function (req, res) {
     save()
   })
   .catch((err) => {
-    res.status(400).json({message: err})
+    if (err) {
+      res.status(400).json({message: err.message})
+    }
   })
 
   function save () {

@@ -70,10 +70,12 @@ const schema = mongoose.Schema(
 schema.statics.hashPassword = function (password) { // @link: https://stackoverflow.com/questions/29664499/mongoose-static-methods-vs-instance-methods
   return new Promise(
     (resolve, reject) => {
-      if (password !== undefined) {
-        resolve(bcrypt.hash(password, 10))
-      } else {
+      if (password === undefined) {
         resolve('') // return empty string upon blank password field
+      } else if (password.length < 8) {
+        reject(new Error('Path `password` should be at least 8 characters'))
+      } else {
+        resolve(bcrypt.hash(password, 10))
       }
     }
   )

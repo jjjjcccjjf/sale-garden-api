@@ -38,6 +38,7 @@ describe('Users', () => {
     it('it should register a user', (done) => {
       chai.request(app)
       .post('/v1/users')
+      .type('form')
       .send({ email: 'test@gmail.com', password: 'password', name: 'Jason Bourne' })
       .end((err, res) => {
         if (err) { console.error(err) }
@@ -51,6 +52,7 @@ describe('Users', () => {
     it('it should NOT register a duplicate user', (done) => {
       chai.request(app)
       .post('/v1/users')
+      .type('form')
       .send({ email: 'test@gmail.com', password: 'password', name: 'Jason Bourne' })
       .end((err, res) => {
         if (err) {
@@ -58,6 +60,21 @@ describe('Users', () => {
           res.body.should.be.a('object')
           res.body.should.have.property('message').to.include('expected `email` to be unique')
           // res.body.length.should.be.eql(0)
+          done()
+        }
+      })
+    })
+
+    it('it should NOT allow a password of less than 8 characters', (done) => {
+      chai.request(app)
+      .post('/v1/users')
+      .type('form')
+      .send({ email: 'test@gmail.com', password: 'passwor', name: 'Jason Bourne' })
+      .end((err, res) => {
+        if (err) {
+          res.should.have.status(400)
+          res.body.should.be.a('object')
+          res.body.should.have.property('message').to.include('at least 8 characters')
           done()
         }
       })
